@@ -27,6 +27,9 @@ class RandomActivity : AppCompatActivity() {
         model.cards.observe(this, Observer {
             setImage()
         })
+        model.handRanking.observe(this, Observer { handRanking ->
+            main.cardText.text = handRanking
+        })
 
         main.btnShuffle.setOnClickListener() {
             model.shuffle()
@@ -39,7 +42,7 @@ class RandomActivity : AppCompatActivity() {
                 "drawable",
                 packageName
             )
-            Log.i("TEST!!!!!", model.cards.value!![index])
+            //Log.i("TEST!!!!!", model.cards.value!![index])
             imageView?.setImageResource(res)
         }
     }
