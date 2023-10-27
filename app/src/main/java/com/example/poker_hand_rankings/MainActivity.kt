@@ -22,5 +22,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, RandomActivity::class.java)
             startActivity(intent)
         }
+
+        main.btnStatistics.setOnClickListener{
+            val intent = Intent(this, StatisticsActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

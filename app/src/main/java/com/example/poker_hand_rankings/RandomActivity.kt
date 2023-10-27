@@ -11,7 +11,7 @@ import com.example.poker_hand_rankings.databinding.ActivityRandomBinding
 
 class RandomActivity : AppCompatActivity() {
     private lateinit var main : ActivityRandomBinding
-    private lateinit var model : LottoViewModel
+    private lateinit var model : PokerViewModel
     private lateinit var images : Array<ImageView?>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +22,7 @@ class RandomActivity : AppCompatActivity() {
         images = arrayOf(main.card1, main.card2, main.card3, main.card4, main.card5)
 
         // model 지정
-        model = ViewModelProvider(this)[LottoViewModel::class.java]
+        model = ViewModelProvider(this)[PokerViewModel::class.java]
 
         model.cards.observe(this, Observer {
             setImage()
@@ -32,7 +32,7 @@ class RandomActivity : AppCompatActivity() {
         })
 
         main.btnShuffle.setOnClickListener() {
-            model.shuffle()
+            model.shuffle(1)
         }
     }
     private fun setImage() {

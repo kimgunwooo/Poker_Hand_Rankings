@@ -1,13 +1,9 @@
 package com.example.poker_hand_rankings
 
-import android.media.Image
-import android.provider.ContactsContract.Data
 import android.util.Log
-import android.widget.ImageView
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import java.util.Locale
 
 enum class CardSuit(val suitName: String) { // 카드의 이름
     SPADES("spades"),
@@ -41,49 +37,62 @@ private fun getCardName(c: Card): String { // enum class 에서 해당되는 값
     return "c_${c.value.valueName}_of_${c.suit.suitName}"
 }
 
-class LottoViewModel : ViewModel() {
+class PokerViewModel : ViewModel() {
     private var _cards = MutableLiveData<Array<String>>()
     private var _handRanking = MutableLiveData<String>()
+    private var _counts = MutableLiveData<Array<Int>>()
     val cards : LiveData<Array<String>>
         get() = _cards
 
     val handRanking : LiveData<String>
         get() = _handRanking
 
-    fun shuffle() {
-        // 앞에 5개는 카드 이미지의 이름, 마지막 인자에는 족보 값이 들어간다.
-        val newCards = Array(5) { "" }
+    val counts : LiveData<Array<Int>>
+        get() = _counts
 
-        // 족보 계산에 사용할 card 정보 저장할 변할 수 있는 List
-        var cardSV : MutableList<Card> = mutableListOf()
+    // Simulate 에 쓰일 족보 갯수 정리
+    private lateinit var newCounts : Array<Int>
 
-        // 초기화
-        var randomSuit : CardSuit
-        var randomValue : CardValue
-        var randomCard : Card
-        var tempStr = ""
+    fun shuffle(times: Int) {
+        newCounts = Array(9){0}
+        repeat(times) {
+            // 앞에 5개는 카드 이미지의 이름, 마지막 인자에는 족보 값이 들어간다.
+            val newCards = Array(5) { "" }
 
-        for (i in newCards.indices) {
-            do {
-                randomSuit = CardSuit.values().random()// 각 enum class 에서 무작위 값 가져오기
-                randomValue = CardValue.values().random()
-                randomCard = Card(randomSuit, randomValue) // Card 객체 만듦
-                tempStr = getCardName(randomCard) // Card 객체로 해당 되는 image resource 이름으로 바꿔서 가져옴
-            } while (newCards.contains(tempStr)) // 중복 체크
-            cardSV.add(randomCard)
-            newCards[i] = tempStr // 임시 객체에 저장
+            // 족보 계산에 사용할 card 정보 저장할 변할 수 있는 List
+            var cardSV: MutableList<Card> = mutableListOf()
+
+            // 초기화
+            var randomSuit: CardSuit
+            var randomValue: CardValue
+            var randomCard: Card
+            var tempStr = ""
+
+            for (i in newCards.indices) {
+                do {
+                    randomSuit = CardSuit.values().random()// 각 enum class 에서 무작위 값 가져오기
+                    randomValue = CardValue.values().random()
+                    randomCard = Card(randomSuit, randomValue) // Card 객체 만듦
+                    tempStr = getCardName(randomCard) // Card 객체로 해당 되는 image resource 이름으로 바꿔서 가져옴
+                } while (newCards.contains(tempStr)) // 중복 체크
+                cardSV.add(randomCard)
+                newCards[i] = tempStr // 임시 객체에 저장
+            }
+
+            newCards.sort() // 낮은 값부터 출력
+
+            // 족보 알고리즘
+            var handRanking = checkPokerHandRanking(cardSV, newCounts)
+            Log.i("TEST!!!!", handRanking)
+
+            // 적용
+            _cards.value = newCards
+            _handRanking.value = handRanking
+            _counts.value = newCounts
         }
-
-        newCards.sort() // 낮은 값부터 출력
-
-        // 족보 알고리즘
-        var handRanking = checkPokerHandRanking(cardSV)
-        Log.i("TEST!!!!", handRanking)
-        _cards.value = newCards
-        _handRanking.value = handRanking
     }
 
-    private fun checkPokerHandRanking(cardSV: MutableList<Card>): String {
+    private fun checkPokerHandRanking(cardSV: MutableList<Card>, newCounts: Array<Int>): String {
         // 카드 값과 슈트를 분리
         val values = cardSV.map { it.value }
         val suits = cardSV.map { it.suit }
@@ -102,12 +111,14 @@ class LottoViewModel : ViewModel() {
         // 스트레이트 플러시 (Straight Flush)
         if (isStraight(sortedValues) && isFlush(suitCountMap)) {
             val highCardValue = sortedValues.last()
+            newCounts[0]++
             return "Straight Flush: ${highCardValue.valueName}"
         }
 
         // 포카드 (Four of a Kind)
         for ((value, count) in valueCountMap) {
             if (count == 4) {
+                newCounts[1]++
                 return "Four of a Kind: ${value.valueName}"
             }
         }
@@ -116,41 +127,48 @@ class LottoViewModel : ViewModel() {
         val threeOfAKindValue = valueCountMap.entries.find { it.value == 3 }?.key
         val pairValue = valueCountMap.entries.find { it.value == 2 }?.key
         if (threeOfAKindValue != null && pairValue != null) {
+            newCounts[2]++
             return "Full House: ${threeOfAKindValue.valueName} and ${pairValue.valueName}"
         }
 
         // 플러시 (Flush)
         if (isFlush(suitCountMap)) {
             val highCardValue = sortedValues.last()
+            newCounts[3]++
             return "Flush: ${highCardValue.valueName}"
         }
 
         // 스트레이트 (Straight)
         if (isStraight(sortedValues)) {
             val highCardValue = sortedValues.last()
+            newCounts[4]++
             return "Straight: ${highCardValue.valueName}"
         }
 
         // 쓰리 오브 어 카인드 (Three of a Kind)
         val threeOfAKindValues = valueCountMap.entries.filter { it.value == 3 }.map { it.key.valueName }
         if (threeOfAKindValues.isNotEmpty()) {
+            newCounts[5]++
             return "Three of a Kind: ${threeOfAKindValues.joinToString(", ")}"
         }
 
         // 투 페어 (Two Pair)
         val pairValues = valueCountMap.entries.filter { it.value == 2 }.map { it.key.valueName }
         if (pairValues.size == 2) {
+            newCounts[6]++
             return "Two Pair: ${pairValues.joinToString(", ")}"
         }
 
         // 원 페어 (One Pair)
         val pairValue2 = valueCountMap.entries.find { it.value == 2 }?.key
         if (pairValue2 != null) {
+            newCounts[7]++
             return "One Pair: ${pairValue2.valueName}"
         }
 
         // 하이 카드 (High Card)
         val highCardValue = values.maxOrNull()
+        newCounts[8]++
         return "High Card: ${highCardValue?.valueName ?: "No cards"}"
 
     }
