@@ -2,6 +2,7 @@ package com.example.poker_hand_rankings
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.poker_hand_rankings.databinding.ActivityStatisticsBinding
@@ -23,10 +24,12 @@ class StatisticsActivity : AppCompatActivity() {
         statistics.submitButton.setOnClickListener {
             val userInput = statistics.editText.text.toString()
 
-            if (userInput.isNotBlank()) {
+            if (userInput.isNotBlank()) { // 빈 값이 아니라면
                 val timesToShuffle = userInput.toInt()
-                model.shuffle(timesToShuffle)
+                model.shuffle(timesToShuffle) // 요청한 횟수 만큼 반복
             }
+
+            Toast.makeText(this, "조회 완료되었습니다!", Toast.LENGTH_SHORT).show() //조회 완료 시 처리
         }
 
         // counts LiveData를 관찰하여 각 족보 횟수를 TextView에 표시
