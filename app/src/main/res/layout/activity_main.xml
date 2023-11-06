@@ -20,12 +20,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/card1"/>
+        app:layout_constraintBottom_toTopOf="@id/card_ai1"/>
 
     <ImageView
-        android:id="@+id/card1"
+        android:id="@+id/card_ai1"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:src="@drawable/c_black_joker"
         app:layout_constraintTop_toBottomOf="@id/text1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,7 +38,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="랜덤 뽑기"
-        app:layout_constraintTop_toBottomOf="@id/card1"
+        app:layout_constraintTop_toBottomOf="@id/card_ai1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnAI"
         app:layout_constraintBottom_toBottomOf="@id/btnStatistics"
