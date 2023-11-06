@@ -143,6 +143,7 @@
         app:layout_constraintTop_toBottomOf="@id/card_user_text"/>
 
     <TextView
+        android:id="@+id/winner_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="여기에 승패가 출력됩니다!"

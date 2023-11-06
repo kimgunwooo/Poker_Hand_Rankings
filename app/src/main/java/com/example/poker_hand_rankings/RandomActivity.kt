@@ -28,7 +28,7 @@ class RandomActivity : AppCompatActivity() {
             setImage()
         })
         model.handRanking.observe(this, Observer { handRanking ->
-            main.cardText.text = handRanking
+            main.cardText?.text = handRanking
         })
 
         main.btnShuffle.setOnClickListener() {
