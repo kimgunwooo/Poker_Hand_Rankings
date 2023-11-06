@@ -83,6 +83,7 @@ class PokerViewModel : ViewModel() {
 
             // 족보 알고리즘
             var handRanking = checkPokerHandRanking(cardSV, newCounts)
+
             Log.i("TEST!!!!", handRanking)
 
             // 적용
@@ -91,6 +92,76 @@ class PokerViewModel : ViewModel() {
             _counts.value = newCounts
         }
     }
+    // 각 족보의 우선순위를 정의한 맵
+    private val handRankingPriority = mapOf(
+        "Straight Flush" to 9,
+        "Four of a Kind" to 8,
+        "Full House" to 7,
+        "Flush" to 6,
+        "Straight" to 5,
+        "Three of a Kind" to 4,
+        "Two Pair" to 3,
+        "One Pair" to 2,
+        "High Card" to 1
+    )
+
+    // 누가 이겼는지 결과를 반환하는 함수
+    fun determineWinner(userHand: String, aiHand: String): String {
+        val (userPriority, userHandName) = extractHandName(userHand)
+        val (aiPriority, aiHandName) = extractHandName(aiHand)
+        Log.i("test", "$userPriority+$aiPriority")
+        val userHandPriority = handRankingPriority[userPriority] ?: 0
+        val aiHandPriority = handRankingPriority[aiPriority] ?: 0
+
+        return when {
+            userHandPriority > aiHandPriority -> "사용자 승리"
+            userHandPriority < aiHandPriority -> "AI 승리"
+            else -> compareEqualHands(userHandName, aiHandName)
+        }
+    }
+
+
+    // handRanking의 결과가 들어오면 ':'를 기준으로 족보 값과, 숫자 값을 비교하는 함수
+    private fun extractHandName(handRanking: String): Pair<String, String> {
+        val colonIndex = handRanking.indexOf(":")
+        if (colonIndex != -1) {
+            val beforeColon = handRanking.substring(0, colonIndex).trim()
+            val afterColon = handRanking.substring(colonIndex + 1).trim()
+            return Pair(beforeColon, afterColon)
+        } else {
+            val trimmedHandRanking = handRanking.trim()
+            return Pair(trimmedHandRanking, trimmedHandRanking)
+        }
+    }
+
+    val cardValuePriority = mapOf(
+        "2" to 2,
+        "3" to 3,
+        "4" to 4,
+        "5" to 5,
+        "6" to 6,
+        "7" to 7,
+        "8" to 8,
+        "9" to 9,
+        "10" to 10,
+        "jack" to 11,
+        "queen" to 12,
+        "king" to 13,
+        "ace" to 14
+    )
+
+    private fun compareEqualHands(userHandName: String, aiHandName: String): String {
+        val userPriority = cardValuePriority[userHandName] ?: 0
+        val aiPriority = cardValuePriority[aiHandName] ?: 0
+
+        return when {
+            userPriority > aiPriority -> "사용자 승리"
+            userPriority < aiPriority -> "AI 승리"
+            else -> "무승부"
+        }
+    }
+
+
 
     private fun checkPokerHandRanking(cardSV: MutableList<Card>, newCounts: Array<Int>): String {
         // 카드 값과 슈트를 분리
